@@ -56,7 +56,7 @@ Run this command to launch a pygame applet that lets the user draw really crappy
 ```
 python3 code/humanImager.py --input_file exampleVideo/ev
 ```
-You can hit ESCAPE to exit if you mess up, and then run it again.
+When the applet gives you a line, you have 30 seconds to draw it in the given zone. You can hit SPACE to advance to the next line early. Also, you can hit ESCAPE to exit if you mess up, and then run the code again. (It will save all the billboards you've finished.)
 
 ### Step 3.2
 There will be the folder lazykh/exampleVideo/ev_billboards that contains all the billboard files. Feel free to swap them out with any other image, like legitimate artwork, or something from the internet.
