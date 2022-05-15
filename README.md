@@ -27,13 +27,17 @@ Example:
 playing around with my giant Earth.
 <angry> I just hope they don't destroy it like my brother did last time!
 ```
-Most of these are pretty self-explanatory. "Explain" is a generally positive emotion where the stick figure is giving the audience information, but not in an over-the-top happy way. "rq" stands for "rhetorical question", and will give the stick figure a shrug-like pose for questions like "But what is gnocchi anyway?" that are answered directly afterward. When you denote an emotion, the stick figure will become that emotion at that part of the script, and will retain it until the next emotion marker, whether that's 1 line away or 100 lines away.
+Most of these are pretty self-explanatory. "Explain" is a generally positive emotion where the stick figure is giving the audience information, but not in an over-the-top happy way. "rq" stands for "rhetorical question", and will give the stick figure a shrug-like pose for questions like "But what is gnocchi anyway?" that are answered directly afterward. When you denote an emotion, the stick figure will become that emotion at that part of the script, and will retain that emotion until the next emotion marker (whether that's 1 line away or 100 lines away).
 
 Square brackets denote the "topic" of a line. These are integrated into spoken lines, so they should be spoken in the audio file, too. If a line doesn't have any square brackets, this program will assume the entire line is the "topic". In the below example, "tarantula" is spoken and it's the topic. "Explain" is not spoken.
 ```
 <explain> Despite bring over 3 inches in length, the [tarantula] is not large enough to have a measurable gravitational pull on the Sun.
 ```
 Square brackets are not necessary, and including them or not doesn't affect the timing of the video at all. The only purpose they have is for drawing billboards. When you draw the billboard for the above line, it will be called "tarantula.png", and there will be a subtitle under the image that says "Tarantula". This is useful because if there is a another line 5 minutes later that also uses the word "tarantula", you can indicate that [tarantula] is again the topic, so you can reuse the same billboard image. If you don't care too much about the billboards, you can ignore including any square brackets at all.
+
+Single line breaks indicate a change in pose without the emotion changing. There are 5 poses within each emotion category (e.g., 5 angry poses), so it's posibble to see the stick figure move his limbs around while still saying the same emotion. If you enable billboards, single line breaks also indiciate a billboard change.
+
+Double line breaks change the background image and flip the entire screen (so if the stick figure was on the left side of the screen, now he's on the right). This is to make the video feel like it's distinctly in a "new section" of discussion. However, double line breaks are never necessary.
 
 ## Creating an actual lazykh video
 I've provided one example project in this repo for you to test: it's called "exampleVideo". For this example project, the audio file is "exampleVideo/ev.wav", and the annotated script file is "exampleVideo/ev.txt". These should be placed in lazykh folder, so the addresses are "lazykh/exampleVideo/ev.wav" and "lazykh/exampleVideo/ev.txt"
