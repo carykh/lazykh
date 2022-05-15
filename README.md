@@ -3,10 +3,14 @@ This Github repo has the source code for the automatic lip-syncing project descr
 
 To create a video using this lazykh code, there are 5 commands you will need to run.
 
-## Before starting
-Step 2 will only work on Mac OS. Install "gentle", the phoneme detection library, from here: https://lowerquality.com/gentle/
+## Things to know before starting
+For Step 2, "Gentle" (the phoneme detection library I'm using) will only work on Mac OS. However, Steps 1, 3, 4, and 5 can be done on any computer. Install "gentle", the phoneme detection library, from here: https://lowerquality.com/gentle/
 
 Put the "gentle-final" folder in the "lazykh" folder. (This is around 3 GB, so be prepared for the large size.) Estimated runtimes are based on my 2015 MacBook Pro, so your results may vary. (Hopefully, they are faster!)
+
+If you're a cool person, please provide credit to me (Cary Huang) when you use this! All it needs to be is a quick mention that you're using software written by carykh spoken in the video, and we're good. I'm making this code open source because I'm just excited to see how other content creators can innovate with this tool, so I don't care too much about clout, financial gain, or legal ownership. I just want to see people being clever/expressive/funny with their videos! But despite that, I'd still appreciate being acknowledged.
+
+Also, aside from easy-to-fix bugs, I won't be maintaining this repo or providing assistance to others. Think of this repo as an archive of how my personal passion project worked. It's not like Adobe's constantly-maintained software, it's just one guy spewing random hobby projects onto the internet! (I go more into detail describing this in my "lazykh goodbye" video: https://www.youtube.com/watch?v=hkOGbehVeQs)
 
 ## Creating an actual lazykh video
 For this example, suppose your video's audio file is "exampleVideo/ev.wav", and your annotated script file is "exampleVideo/ev.txt". These should be placed in lazykh folder, so the addresses are "lazykh/exampleVideo/ev.wav" and "lazykh/exampleVideo/ev.txt"
