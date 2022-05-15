@@ -12,8 +12,31 @@ If you're a cool person, please provide credit to me (Cary Huang) when you use t
 
 Also, aside from easy-to-fix bugs, I won't be maintaining this repo or providing assistance to others. Think of this repo as an archive of how my personal passion project worked. It's not like Adobe's constantly-maintained software, it's just one guy spewing random hobby projects onto the internet! (I go into a more detailed discussion of this in my "lazykh goodbye" video: https://www.youtube.com/watch?v=hkOGbehVeQs)
 
+## The script
+The script is a .txt file that tells Gentle what words you're actually saying, and it should match your spoken audio as close as possible, if not perfectly. Read through example/ev.txt for an example.
+
+You'll notice that occasionally, the text in ev.txt are synonym words to what I actually say. For example, instead of "Cary-ness" (which is what I say), ev.txt contains the words "caring es". Simiarly, instead of "Minecraft", it has "Mine craft". This is because Gentle's dictionary only contains common words. If you include a word in the script that Gentle doesn't know, the stick figure will just not lip-sync that word at all, which isn't ideal. The janky solution is to type common words that produce the same mouth shapes as the uncommon word, to get the same desired effect. For example, I might say the word "Amogus" in the audio, but since that word is so recent, Gentle doesn't know it. I might type "Um hoe cuss" as a substitute, and hope Gentle can connect the dots. To find better substitutes, it's helpful to know which phonemes use the same letters (F/V,  B/P/M,  K/D/G/J/N/S/T/Z,  L/Y/H,  etc.).
+
+Anything in triangle brackets is an emotion that is not verbally said. There are only 6 permitted emotions:
+```
+explain,happy,sad,angry,confused,rq
+
+Example:
+
+<happy> It would be really cool, to see other Minecraft players
+playing around with my giant Earth.
+<angry> I just hope they don't destroy it like my brother did last time!
+```
+Most of these are pretty self-explanatory. "Explain" is a generally positive emotion where the stick figure is giving the audience information, but not in an over-the-top happy way. "rq" stands for "rhetorical question", and will give the stick figure a shrug-like pose for questions like "But what is gnocchi anyway?" that are answered directly afterward. When you denote an emotion, the stick figure will become that emotion at that part of the script, and will retain it until the next emotion marker, whether that's 1 line away or 100 lines away.
+
+Square brackets denote the "topic" of a line. These are integrated into spoken lines, so they should be spoken in the audio file, too. If a line doesn't have any square brackets, this program will assume the entire line is the "topic". In the below example, "tarantula" is spoken and it's the topic. "Explain" is not spoken.
+```
+<explain> Despite bring over 3 inches in length, the [tarantula] is not large enough to have a measurable gravitational pull on the Sun.
+```
+Square brackets are not necessary, and including them or not doesn't affect the timing of the video at all. The only purpose they have is for drawing billboards. When you draw the billboard for the above line, it will be called "tarantula.png", and there will be a subtitle under the image that says "Tarantula". This is useful because if there is a another line 5 minutes later that also uses the word "tarantula", you can indicate that [tarantula] is again the topic, so you can reuse the same billboard image. If you don't care too much about the billboards, you can ignore including any square brackets at all.
+
 ## Creating an actual lazykh video
-For this example, suppose your video's audio file is "exampleVideo/ev.wav", and your annotated script file is "exampleVideo/ev.txt". These should be placed in lazykh folder, so the addresses are "lazykh/exampleVideo/ev.wav" and "lazykh/exampleVideo/ev.txt"
+I've provided one example project in this repo for you to test: it's called "exampleVideo". For this example project, the audio file is "exampleVideo/ev.wav", and the annotated script file is "exampleVideo/ev.txt". These should be placed in lazykh folder, so the addresses are "lazykh/exampleVideo/ev.wav" and "lazykh/exampleVideo/ev.txt"
 
 ### Step 1 - Remove the annotations from the script to make it "gentle-friendly" (Runtime: instant)
 Open a command prompt, go to the lazykh folder, and run this command. This will create ev_g.txt
@@ -48,7 +71,7 @@ python3 code/videoFinisher.py --input_file exampleVideo/ev --keep_frames F
 If you want to start working on more video projects with different filepaaths, replace "exampleVideo/ev" with the new video's filepath in all the commands above before running them. It should work for your new videos.
 
 
-## Alternate settings
+## Alternate settings (adding billboards)
 Running the 5 standard commands listed above will give you a video with no synchronized billboards to the side of the avatar-speaker-talking-guy. If you want to include billboards drawings, do these steps between steps 3 and 4:
 
 ### Step 3.1
