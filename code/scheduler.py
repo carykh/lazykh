@@ -155,4 +155,4 @@ for i in range(len(strings)):
         f.write("SECTION\n")
 f.flush()
 f.close()
-print("Done.")
+print(f"Done creating schedule for {INPUT_FILE}.")
