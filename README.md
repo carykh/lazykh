@@ -4,7 +4,10 @@ This Github repo has the source code for the automatic lip-syncing project descr
 Creating a video using this lazykh code is a 5-step-process! (That sounds intimidating, some steps take under 5 seconds.) 
 
 ## Things to know before starting
-For Step 2, "Gentle" (the phoneme detection library I'm using) will only work on Mac OS. However, Steps 1, 3, 4, and 5 can be done on any computer. Install "gentle", the phoneme detection library, from here: https://lowerquality.com/gentle/
+For Step 2, "Gentle" (the phoneme detection library I'm using) will only work on Mac OS. However, Steps 1, 3, 4, and 5 can be done on any computer. The source code for "gentle" comes from here: https://github.com/lowerquality/gentle. However, I've found the only way to get gentle to work is to run this command, ideally from within the lazykh folder:
+```
+git clone --recurse-submodules https://github.com/lowerquality/gentle.git
+```
 
 Put the "gentle-final" folder in the "lazykh" folder. (This is around 3 GB, so be prepared for the large size.) Estimated runtimes are based on my 2015 MacBook Pro, so your results may vary. (Hopefully, they are faster!)
 
@@ -51,7 +54,7 @@ python3 code/gentleScriptWriter.py --input_file exampleVideo/ev
 ### Step 2 - Calculate phoneme timestamps (Runtime: 2 minutes for a 5-min video)
 Run this command, which will create ev.json.
 ```
-python3 gentle-final/align.py exampleVideo/ev.wav exampleVideo/ev_g.txt -o exampleVideo/ev.json
+python3 gentle/align.py exampleVideo/ev.wav exampleVideo/ev_g.txt -o exampleVideo/ev.json
 ```
 
 ### Step 3 - Create a simplified timetable (Runtime: 2 seconds for a 5-min video)
