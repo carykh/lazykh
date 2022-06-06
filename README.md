@@ -54,10 +54,10 @@ Open a command prompt, go to the lazykh folder, and run this command. This will 
 python3 code/gentleScriptWriter.py --input_file exampleVideo/ev
 ```
 
-### Step 2 - Calculate phoneme timestamps (Runtime: 2 minutes for a 5-min video)
+### Step 2 - Calculate phoneme timestamps with 'gentle'. (Runtime: 2 minutes for a 5-min video)
 Run this command, which will create ev.json.
 ```
-python3 gentle/align.py exampleVideo/ev.wav exampleVideo/ev_g.txt -o exampleVideo/ev.json
+python3 gentle-final/align.py exampleVideo/ev.wav exampleVideo/ev_g.txt -o exampleVideo/ev.json
 ```
 
 ### Step 3 - Create a simplified timetable (Runtime: 2 seconds for a 5-min video)
