@@ -33,7 +33,7 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
     else:
         frame = Image.open("backgrounds/bga"+str(paragraph%BACKGROUND_COUNT)+".png")
         CACHES[0] = [paragraph,frame]
-    frame = Image.eval(frame, lambda x: 256-(256-x)/2)
+    frame = Image.eval(frame, lambda x: int(256-(256-x)/2)) # Makes the entire background image move 50% closer to white. In other words, it's paler.
 
     if USE_BILLBOARDS:
         if imageNum == CACHES[2][0]:
@@ -46,7 +46,7 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
         W_scale = SCRIBBLE_W/s_W
         H_scale = SCRIBBLE_H/s_H
         O_scale = min(W_scale,H_scale)
-        scribble = scribble.resize((int(round(O_scale*s_W)),int(round(O_scale*s_H))), Image.ANTIALIAS)
+        scribble = scribble.resize((int(round(O_scale*s_W)),int(round(O_scale*s_H))), Image.Resampling.LANCZOS)
 
         s_W, s_H = scribble.size
 
@@ -85,12 +85,12 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
     mouth = Image.open("mouths/mouth"+"{:04d}".format(mouthImageNum)+".png")
 
     if MOUTH_COOR[poseIndex,2] < 0:
-        mouth = mouth.transpose(Image.FLIP_LEFT_RIGHT)
+        mouth = mouth.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     if MOUTH_COOR[poseIndex,3] != 1:
         m_W, m_H = mouth.size
-        mouth = mouth.resize((int(abs(m_W*MOUTH_COOR[poseIndex,2])), int(m_H*MOUTH_COOR[poseIndex,3])), Image.ANTIALIAS)
+        mouth = mouth.resize((int(abs(m_W*MOUTH_COOR[poseIndex,2])), int(m_H*MOUTH_COOR[poseIndex,3])), Image.Resampling.LANCZOS)
     if MOUTH_COOR[poseIndex,4] != 0:
-        mouth = mouth.rotate(-MOUTH_COOR[poseIndex,4],resample=Image.BICUBIC)
+        mouth = mouth.rotate(-MOUTH_COOR[poseIndex,4],resample=Image.Resampling.BICUBIC)
 
     m_W, m_H = mouth.size
     body.paste(mouth,(int(MOUTH_COOR[poseIndex,0]-m_W/2),int(MOUTH_COOR[poseIndex,1]-m_H/2)),mouth)
@@ -106,10 +106,10 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
     else:
         inx += 50
     iny = int(round(W_H-nh))
-    body = body.resize((inw,inh), Image.ANTIALIAS)
+    body = body.resize((inw,inh), Image.Resampling.LANCZOS)
 
     if FLIPPED:
-        body = body.transpose(Image.FLIP_LEFT_RIGHT)
+        body = body.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     frame.paste(body,(inx-s_X,iny),body)
     if not os.path.isdir(INPUT_FILE+"_frames"):
         os.makedirs(INPUT_FILE+"_frames")
@@ -266,20 +266,3 @@ for frame in range(0,FRAME_COUNT):
     drawFrame(frame,paragraph,emotion,imageNum,pose,phonemesPerFrame[frame],timeSincePrevPoseChange,timeUntilNextPoseChange)
     if frame%PRINT_EVERY == 0 or frame == FRAME_COUNT-1:
         print(f"Just drew frame {frame+1} / {FRAME_COUNT}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#g
