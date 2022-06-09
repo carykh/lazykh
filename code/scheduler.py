@@ -44,7 +44,8 @@ mouthList = [["aa","a"],["ae","a"],["ah","a"],["ao","a"],["aw","au"],
 ["l","y"],["m","m"],["n","t"],["ng","t"],["ow","au"],
 ["oy","ua"],["p","m"],["r","u"],["s","t"],["sh","t"],
 ["t","t"],["th","t"],["uh","u"],["uw","u"],["v","f"],
-["w","u"],["y","y"],["z","t"],["zh","t"]]
+["w","u"],["y","y"],["z","t"],["zh","t"],
+["oov","m"]] # For unknown phonemes, the stick figure will just have a closed mouth ("mmm")
 
 mouths = {}
 for x in mouthList:
