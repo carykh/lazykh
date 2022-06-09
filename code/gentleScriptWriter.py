@@ -7,12 +7,10 @@ parser.add_argument('--input_file', type=str,  help='the script')
 args = parser.parse_args()
 INPUT_FILE = args.input_file
 
-f = open(INPUT_FILE+".txt","r+")
-script = f.read()
-f.close()
+with open(INPUT_FILE+".txt","r+") as f:
+  script = f.read()
 
-f = open(INPUT_FILE+"_g.txt","w+")
-f.write(removeTags(script))
-f.flush()
-f.close()
+with open(INPUT_FILE+"_g.txt","w+") as f:
+  f.write(removeTags(script))  # This will automatically flush anyway
+
 print("Done creating the gentle-friendly script!")
