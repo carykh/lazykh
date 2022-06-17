@@ -28,7 +28,7 @@ HAH CARY i made it 1 FILE ONLY! MWHAHHH
 ### Step 1
 open a terminal and run:
 ```
-sh LAZYKH.sh (drag and drop the file
+sh LAZYKH.sh (drag and drop the file)
 ```
 
 ### Step 2
