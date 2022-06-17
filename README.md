@@ -1,4 +1,5 @@
 # lazykh
+(IF YOU HAVE QUESTIONS, GO TO THE ISSUES PAGE AND ASK THERE!!!)
 This Github repo has the source code for the automatic lip-syncing project described in these videos:
 
 2020: https://www.youtube.com/watch?v=y3B8YqeLCpY 
