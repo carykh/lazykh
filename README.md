@@ -24,6 +24,7 @@ I'm assuming you already know how to make a lazykh video...
 
 ## Creating an actual lazykh video
 HAH CARY i made it 1 FILE ONLY! MWHAHHH
+**RUN LAZYKS.SH FIRST!!!!!!!!!!**
 
 ### Step 1
 open a terminal and run:
