@@ -21,6 +21,7 @@ JSON=$(echo $RESTXTDIR".json")
 
 python3 gentle-final/align.py $MP3DIR $EVG -o $JSON
 
+read -p "If you want,, edit the json files to fix unaligned words if you wish. Otherwise, press enter."
 
 python3 code/scheduler.py --input_file $RESTXTDIR
 
@@ -35,3 +36,5 @@ python3 code/videoDrawer.py --input_file $RESTXTDIR --use_billboards $BOARD --ji
 
 python3 code/videoFinisher.py --input_file $RESTXTDIR --keep_frames $FRAMES
 
+echo "Finished building lazykh video!"
+exit 1
