@@ -1,5 +1,23 @@
 #!/bin/bash
 
+#check if numpy is installed
+if ! python3 -c "import numpy" 2>/dev/null; then
+    echo "numpy is not installed. Please install numpy before running this script."
+    exit 1
+fi
+
+#check if pygame is installed
+if ! python3 -c "import pygame" 2>/dev/null; then
+    echo "pygame is not installed. Please install pygame before running this script."
+    exit 1
+fi
+
+#check if PIL is installed
+if ! python3 -c "import PIL" 2>/dev/null; then
+    echo "PIL is not installed. Please install PIL before running this script."
+    exit 1
+fi
+
 read -p "Where is lazykh-main?: " CDD
 
 cd $CDD
