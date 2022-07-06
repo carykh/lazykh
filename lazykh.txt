@@ -1,0 +1,18 @@
+Command 1
+python3 code/gentleScriptWriter.py --input_file videos/exampleVideo/ev
+
+Command 2
+python3 gentle-final/align.py videos/exampleVideo/ev.wav videos/exampleVideo/ev_g.txt -o videos/exampleVideo/ev.json
+
+Command 3
+python3 code/scheduler.py --input_file videos/exampleVideo/ev
+
+Command 3.5 #optional
+python3 code/humanImager.py --input_file videos/exampleVideo/ev
+
+Command 4 #has inputs you can change
+python3 code/videoDrawer.py --input_file videos/exampleVideo/ev --use_billboards F --jiggly_transitions F
+
+Command 5
+python3 code/videoFinisher.py --input_file videos/exampleVideo/ev --keep_frames F
+
