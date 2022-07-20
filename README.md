@@ -7,6 +7,8 @@ This Github repo has the source code for the automatic lip-syncing project descr
 
 Creating a video using this lazykh code is a 5-step-process! (That sounds intimidating, but some steps take under 5 seconds.) 
 
+2022-07-20 UPDATE: I added frame-caching to Step 4 (frame drawing), which speeds up the frame drawing by about 5 times! (Now, if it detects that the current frame has the exact same parameters as a previously-rendered frame, it will just copy-paste that frame, which is much faster.) So, to render a 5-minute video, it only takes around 10-12 minutes on my machine, instead of one hour.
+
 ## Things to know before starting
 For Step 2, "Gentle" (the phoneme detection library I'm using) will only work on Mac OS. However, Steps 1, 3, 4, and 5 can be done on any computer. The source code for "gentle" comes from here: https://github.com/lowerquality/gentle. However, I've found the only way to get gentle to work is to run this command, ideally from within the lazykh folder:
 ```
@@ -70,7 +72,7 @@ Run this command, which will create ev_schedule.json. (This is not my code, it's
 python3 code/scheduler.py --input_file exampleVideo/ev
 ```
 
-### Step 4 - Render the frames (Runtime: 1 hour for a 5-min video)
+### Step 4 - Render the frames (Runtime: 12 minutes for a 5-min video)
 Run this command, which will create thousands of image files. (30 images per second of final video)
 ```
 python3 code/videoDrawer.py --input_file exampleVideo/ev --use_billboards F --jiggly_transitions F
