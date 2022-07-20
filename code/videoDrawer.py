@@ -156,10 +156,11 @@ def setPhoneme(i):
         START_FORCE_OPEN = (prevPhoneme == 't' or prevPhoneme == 'y')
         END_FORCE_OPEN = (nextPhoneme == 't' or nextPhoneme == 'y')
         OPEN_TRACKS = [
-        [[1],[2],[2],[2]],
-        [[2,1],[1,2],[2,1],[3,2]],
-        [[1,2,1],[1,3,2],[2,3,1],[2,3,2]],
-        [[1,3,2,1],[1,2,3,2],[2,3,2,1],[2,3,3,2]]]
+            [[1],[2],[2],[2]],
+            [[2,1],[1,2],[2,1],[3,2]],
+            [[1,2,1],[1,3,2],[2,3,1],[2,3,2]],
+            [[1,3,2,1],[1,2,3,2],[2,3,2,1],[2,3,3,2]]
+        ]
         if frameLen >= 5:
             startSize = 1
             endSize = 1
@@ -192,7 +193,7 @@ def setPhoneme(i):
             phonemesPerFrame[nextFrame-1] += 1
 
 def timestepToFrames(timestep):
-    return max(0,int(timestep*FRAME_RATE-2))
+    return max(0, int(timestep*FRAME_RATE-2))
 
 def stateOf(p):
     global indicesOn
@@ -221,9 +222,8 @@ USE_BILLBOARDS = (args.use_billboards == "T")
 ENABLE_JIGGLING = (args.jiggly_transitions == "T")
 ENABLE_FRAME_CACHING = (args.frame_caching != "F")
 
-f = open(INPUT_FILE+"_schedule.csv","r+")
-scheduleLines = f.read().split("\nSECTION\n")
-f.close()
+with open(INPUT_FILE+"_schedule.csv","r+") as f:
+    scheduleLines = f.read().split("\nSECTION\n")
 
 schedules = [None]*PARTS_COUNT
 for i in range(PARTS_COUNT):
@@ -234,35 +234,31 @@ lastParts = schedules[-1][-2].split(",")
 lastTimestamp = float(lastParts[0])
 FRAME_COUNT = timestepToFrames(lastTimestamp+1)
 phonemeTimeline = []
-for i in range(len(schedules[4])):
-    parts = schedules[4][i].split(",")
-    timestamp = float(parts[0])
-    framestamp = timestepToFrames(timestamp)
+for elem in schedules[4]:
+    timestamp, _, phoneme = elem.split(",")
+    framestamp = timestepToFrames(float(timestamp))
     if i >= 1 and framestamp <= phonemeTimeline[-1][1]: # we have a 0-frame phoneme! Try to fix it.
         if i >= 2 and phonemeTimeline[-2][1] <= framestamp-2:
             phonemeTimeline[-1][1] = framestamp-1 # shift previous one back
         else:
             framestamp += 1 # shift current one forward
-    phoneme = parts[2]
-    phonemeTimeline.append([phoneme,framestamp])
-phonemeTimeline.append(["end",FRAME_COUNT])
+    phonemeTimeline.append([phoneme, framestamp])
+phonemeTimeline.append(["end", FRAME_COUNT])
 phonemesPerFrame = np.zeros(FRAME_COUNT,dtype='int32')
 for i in range(len(phonemeTimeline)-1):
     setPhoneme(i)
 
-f = open(INPUT_FILE+".txt","r+")
-origScript = f.read().split("\n")
-f.close()
+with open(INPUT_FILE+".txt","r+") as f:
+    origScript = f.read().split("\n")
 #while "" in origStr:
 #    origStr.remove("")
 
+with open("code/mouthCoordinates.csv","r+") as f:
+    mouthCoordinatesStr = f.read().split("\n")
 
-f = open("code/mouthCoordinates.csv","r+")
-mouthCoordinatesStr = f.read().split("\n")
-f.close()
 MOUTH_COOR = np.zeros((POSE_COUNT,5))
-for i in range(len(mouthCoordinatesStr)):
-    parts = mouthCoordinatesStr[i].split(",")
+for i, string in enumerate(mouthCoordinatesStr):
+    parts = string.split(",")
     for j in range(5):
         MOUTH_COOR[i,j] = float(parts[j])
 MOUTH_COOR[:,0:2] *= 3 #upscale for 1080p, not 360p
