@@ -6,7 +6,9 @@ import random
 from PIL import Image, ImageDraw
 import math
 from utils import getFilenameOfLine
+import shutil
 
+FRAME_START_RENDER_AT  = 0
 PRINT_EVERY = 10
 FRAME_RATE = 30
 PARTS_COUNT = 5
@@ -18,9 +20,12 @@ POSE_COUNT = 30
 SCRIBBLE_W = 880
 SCRIBBLE_H = 1000
 
+MAX_JIGGLE_TIME = 7
 BACKGROUND_COUNT = 5
 
 def getJiggle(x, fader, multiplier):
+    if x >= MAX_JIGGLE_TIME:
+        return 1
     return math.exp(-fader*pow(x/multiplier,2))*math.sin(x/multiplier)
 
 def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLast,poseTimeTillNext):
@@ -35,26 +40,29 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
         CACHES[0] = [paragraph,frame]
     frame = Image.eval(frame, lambda x: int(256-(256-x)/2)) # Makes the entire background image move 50% closer to white. In other words, it's paler.
 
+    scribble = None
     if USE_BILLBOARDS:
+        FILENAME = f"{INPUT_FILE}_billboards/{getFilenameOfLine(origScript[imageNum])}.png"
         if imageNum == CACHES[2][0]:
             scribble = CACHES[2][1]
-        else:
-            scribble = Image.open(f"{INPUT_FILE}_billboards/{getFilenameOfLine(origScript[imageNum])}.png")
+        elif os.path.isfile(FILENAME):
+            scribble = Image.open(FILENAME)
             CACHES[2] = [imageNum,scribble]
 
-        s_W, s_H = scribble.size
-        W_scale = SCRIBBLE_W/s_W
-        H_scale = SCRIBBLE_H/s_H
-        O_scale = min(W_scale,H_scale)
-        scribble = scribble.resize((int(round(O_scale*s_W)),int(round(O_scale*s_H))), Image.Resampling.LANCZOS)
+        if scribble is not None:
+            s_W, s_H = scribble.size
+            W_scale = SCRIBBLE_W/s_W
+            H_scale = SCRIBBLE_H/s_H
+            O_scale = min(W_scale,H_scale)
+            scribble = scribble.resize((int(round(O_scale*s_W)),int(round(O_scale*s_H))), Image.Resampling.LANCZOS)
 
-        s_W, s_H = scribble.size
+            s_W, s_H = scribble.size
 
     s_X = 0
     if FLIPPED:
         s_X += int(W_W/2)
 
-    if USE_BILLBOARDS:
+    if USE_BILLBOARDS and scribble is not None:
         img1 = ImageDraw.Draw(frame)
         img1.rectangle([(s_X+W_M-4,W_M-4),(s_X+W_W/2-W_M+8,W_H-W_M+8)], fill ="#603810")
         img_centerX = s_X+W_M*2+SCRIBBLE_W*0.5
@@ -114,6 +122,14 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
     if not os.path.isdir(INPUT_FILE+"_frames"):
         os.makedirs(INPUT_FILE+"_frames")
     frame.save(INPUT_FILE+"_frames/f"+"{:06d}".format(frameNum)+".png")
+
+def duplicateFrame(prevFrame, thisFrame):
+    prevFrameFile = INPUT_FILE+"_frames/f"+"{:06d}".format(prevFrame)+".png"
+    thisFrameFile = INPUT_FILE+"_frames/f"+"{:06d}".format(thisFrame)+".png"
+    shutil.copyfile(prevFrameFile, thisFrameFile)
+
+def infoToString(arr):
+    return ','. join(map(str,arr))
 
 def setPhoneme(i):
     global phonemeTimeline
@@ -198,10 +214,12 @@ parser = argparse.ArgumentParser(description='blah')
 parser.add_argument('--input_file', type=str,  help='the script')
 parser.add_argument('--use_billboards', type=str,  help='do you want to use billboards or not')
 parser.add_argument('--jiggly_transitions', type=str,  help='Do you want the stick figure to jiggle when transitioning between poses?')
+parser.add_argument('--frame_caching', type=str,  help='Do you want the program to duplicate frame files if they look exactly the same? This will speed up rendering by 5x. By default, this is already enabled!')
 args = parser.parse_args()
 INPUT_FILE = args.input_file
 USE_BILLBOARDS = (args.use_billboards == "T")
 ENABLE_JIGGLING = (args.jiggly_transitions == "T")
+ENABLE_FRAME_CACHING = (args.frame_caching != "F")
 
 f = open(INPUT_FILE+"_schedule.csv","r+")
 scheduleLines = f.read().split("\nSECTION\n")
@@ -249,7 +267,9 @@ for i in range(len(mouthCoordinatesStr)):
         MOUTH_COOR[i,j] = float(parts[j])
 MOUTH_COOR[:,0:2] *= 3 #upscale for 1080p, not 360p
 
+lastFrameInfo = None
 CACHES = [[None,None]]*PARTS_COUNT
+FRAME_CACHES = {}
 indicesOn = [-1]*(PARTS_COUNT-1)
 for frame in range(0,FRAME_COUNT):
     for p in range(PARTS_COUNT-1):
@@ -263,6 +283,18 @@ for frame in range(0,FRAME_COUNT):
     timeSincePrevPoseChange = frame-frameOf(3,0)
     timeUntilNextPoseChange = frameOf(3,1)-frame
 
-    drawFrame(frame,paragraph,emotion,imageNum,pose,phonemesPerFrame[frame],timeSincePrevPoseChange,timeUntilNextPoseChange)
-    if frame%PRINT_EVERY == 0 or frame == FRAME_COUNT-1:
-        print(f"Just drew frame {frame+1} / {FRAME_COUNT}")
+    TSPPC_cache = min(timeSincePrevPoseChange, MAX_JIGGLE_TIME) if ENABLE_JIGGLING else 0
+    TUNPC_cache = min(timeUntilNextPoseChange, MAX_JIGGLE_TIME) if ENABLE_JIGGLING else 0
+    IMAGE_cache = imageNum if USE_BILLBOARDS else 0
+
+    thisFrameInfo = infoToString([paragraph, emotion, IMAGE_cache, pose, phonemesPerFrame[frame], TSPPC_cache, TUNPC_cache])
+    if ENABLE_FRAME_CACHING and thisFrameInfo not in FRAME_CACHES:
+        FRAME_CACHES[thisFrameInfo] = frame
+
+    if frame >= FRAME_START_RENDER_AT:
+        if ENABLE_FRAME_CACHING and FRAME_CACHES[thisFrameInfo] < frame:
+            duplicateFrame(FRAME_CACHES[thisFrameInfo], frame)
+        else:
+            drawFrame(frame,paragraph,emotion,imageNum,pose,phonemesPerFrame[frame],timeSincePrevPoseChange,timeUntilNextPoseChange)
+        if frame%PRINT_EVERY == 0 or frame == FRAME_COUNT-1:
+            print(f"Just drew frame {frame+1} / {FRAME_COUNT}")
