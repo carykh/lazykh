@@ -36,11 +36,5 @@ def getTopic(stri):
         return removeTags(stri)
 
 def capitalize(stri):
-    words = stri.split(" ")
-    result = ""
-    for i in range(len(words)):
-        if i >= 1:
-            result = result+" "
-        w = words[i]
-        result = result+w[0].upper()+w[1:]
-    return result
+    # This is kept so the rest of the library still functions properly.
+    return stri.title()
