@@ -1,12 +1,16 @@
 import argparse
 import os.path
-import json
 import numpy as np
-import random
 from PIL import Image, ImageDraw
 import math
 from utils import getFilenameOfLine
 import shutil
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent import futures
+import time
+
+start_time = time.time()
 
 FRAME_START_RENDER_AT  = 0
 PRINT_EVERY = 10
@@ -30,14 +34,13 @@ def getJiggle(x, fader, multiplier):
 
 def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLast,poseTimeTillNext):
     global MOUTH_COOR
-    global BG_CACHE
     FLIPPED = (paragraph%2 == 1)
 
     if paragraph == CACHES[0][0]:
         frame = CACHES[0][1]
     else:
         frame = Image.open("backgrounds/bga"+str(paragraph%BACKGROUND_COUNT)+".png")
-        CACHES[0] = [paragraph,frame]
+        
     frame = Image.eval(frame, lambda x: int(256-(256-x)/2)) # Makes the entire background image move 50% closer to white. In other words, it's paler.
 
     scribble = None
@@ -119,9 +122,9 @@ def drawFrame(frameNum,paragraph,emotion,imageNum,pose,phoneNum,poseTimeSinceLas
     if FLIPPED:
         body = body.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     frame.paste(body,(inx-s_X,iny),body)
-    if not os.path.isdir(INPUT_FILE+"_frames"):
-        os.makedirs(INPUT_FILE+"_frames")
-    frame.save(INPUT_FILE+"_frames/f"+"{:06d}".format(frameNum)+".png")
+    frameFile = INPUT_FILE+"_frames/f"+"{:06d}".format(frameNum)+".png"
+    frame.save(frameFile)
+    CACHES[0] = [paragraph,frame]
 
 def duplicateFrame(prevFrame, thisFrame):
     prevFrameFile = INPUT_FILE+"_frames/f"+"{:06d}".format(prevFrame)+".png"
@@ -215,12 +218,13 @@ parser.add_argument('--input_file', type=str,  help='the script')
 parser.add_argument('--use_billboards', type=str,  help='do you want to use billboards or not')
 parser.add_argument('--jiggly_transitions', type=str,  help='Do you want the stick figure to jiggle when transitioning between poses?')
 parser.add_argument('--frame_caching', type=str,  help='Do you want the program to duplicate frame files if they look exactly the same? This will speed up rendering by 5x. By default, this is already enabled!')
+parser.add_argument('--print',type=str, help= 'Do you want print statements?')
 args = parser.parse_args()
 INPUT_FILE = args.input_file
 USE_BILLBOARDS = (args.use_billboards == "T")
 ENABLE_JIGGLING = (args.jiggly_transitions == "T")
 ENABLE_FRAME_CACHING = (args.frame_caching != "F")
-
+PRINTSTATEMENTS = (args.frame_caching == "T")
 f = open(INPUT_FILE+"_schedule.csv","r+")
 scheduleLines = f.read().split("\nSECTION\n")
 f.close()
@@ -270,7 +274,24 @@ MOUTH_COOR[:,0:2] *= 3 #upscale for 1080p, not 360p
 lastFrameInfo = None
 CACHES = [[None,None]]*PARTS_COUNT
 FRAME_CACHES = {}
+CPUCOUNT = multiprocessing.cpu_count()
 indicesOn = [-1]*(PARTS_COUNT-1)
+threads = []
+if not os.path.isdir(INPUT_FILE+"_frames"):
+        os.makedirs(INPUT_FILE+"_frames")
+
+def frameGenerator(paragraph, emotion, imageNum, pose, timeSincePrevPoseChange,timeUntilNextPoseChange, TSPPC_cache, TUNPC_cache, IMAGE_cache, phonemesPerFrame, frame):
+        thisFrameInfo = infoToString([paragraph, emotion, IMAGE_cache, pose, phonemesPerFrame[frame], TSPPC_cache, TUNPC_cache])
+        if frame >= FRAME_START_RENDER_AT:
+            if ENABLE_FRAME_CACHING and FRAME_CACHES.get(thisFrameInfo, float('inf')) < frame:
+                duplicateFrame(FRAME_CACHES[thisFrameInfo], frame)
+            else:
+                drawFrame(frame,paragraph,emotion,imageNum,pose,phonemesPerFrame[frame],timeSincePrevPoseChange,timeUntilNextPoseChange)
+                if ENABLE_FRAME_CACHING and thisFrameInfo not in FRAME_CACHES:
+                    FRAME_CACHES[thisFrameInfo] = frame
+            if PRINTSTATEMENTS and (frame%PRINT_EVERY == 0 or frame == FRAME_COUNT-1):
+                print(f"Just printed frame {frame+1} / {FRAME_COUNT}")
+
 for frame in range(0,FRAME_COUNT):
     for p in range(PARTS_COUNT-1):
         frameOfNext = frameOf(p,1)
@@ -286,15 +307,10 @@ for frame in range(0,FRAME_COUNT):
     TSPPC_cache = min(timeSincePrevPoseChange, MAX_JIGGLE_TIME) if ENABLE_JIGGLING else 0
     TUNPC_cache = min(timeUntilNextPoseChange, MAX_JIGGLE_TIME) if ENABLE_JIGGLING else 0
     IMAGE_cache = imageNum if USE_BILLBOARDS else 0
+    threads.append([paragraph, emotion, imageNum, pose, timeSincePrevPoseChange,timeUntilNextPoseChange, TSPPC_cache, TUNPC_cache, IMAGE_cache, phonemesPerFrame, frame])
 
-    thisFrameInfo = infoToString([paragraph, emotion, IMAGE_cache, pose, phonemesPerFrame[frame], TSPPC_cache, TUNPC_cache])
-    if ENABLE_FRAME_CACHING and thisFrameInfo not in FRAME_CACHES:
-        FRAME_CACHES[thisFrameInfo] = frame
-
-    if frame >= FRAME_START_RENDER_AT:
-        if ENABLE_FRAME_CACHING and FRAME_CACHES[thisFrameInfo] < frame:
-            duplicateFrame(FRAME_CACHES[thisFrameInfo], frame)
-        else:
-            drawFrame(frame,paragraph,emotion,imageNum,pose,phonemesPerFrame[frame],timeSincePrevPoseChange,timeUntilNextPoseChange)
-        if frame%PRINT_EVERY == 0 or frame == FRAME_COUNT-1:
-            print(f"Just drew frame {frame+1} / {FRAME_COUNT}")
+with ThreadPoolExecutor(max_workers=CPUCOUNT) as executor:
+    futures = [executor.submit(frameGenerator,t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10]) for t in threads]
+    for future in as_completed(futures):
+        future.result()
+print(f"Total execution time: {time.time()-start_time}")
